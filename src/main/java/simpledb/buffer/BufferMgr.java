@@ -2,14 +2,18 @@ package simpledb.buffer;
 
 import simpledb.file.*;
 import simpledb.log.LogMgr;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Manages the pinning and unpinning of buffers to blocks.
  * @author Edward Sciore
  *
  */
-public class BufferMgr {
-   private Buffer[] bufferpool; /* buffer pool */ 
+public class BufferMgr { 
+   private LinkedList<Buffer> unpinned_list;
+   private Map<BlockId,Buffer> map_buffer;
    private int numAvailable;   /* the number of available (unpinned) buffer slots */
    private static final long MAX_TIME = 10000; /* 10 seconds */
    
@@ -21,10 +25,16 @@ public class BufferMgr {
     * @param numbuffs the number of buffer slots to allocate
     */
    public BufferMgr(FileMgr fm, LogMgr lm, int numbuffs) {
+      this.unpinned_list = new LinkedList<>();
+      this.map_buffer = new HashMap<>();
+      this.numAvailable = numbuffs;
+      for(int i=0; i<numbuffs; i++) unpinned_list.add(new Buffer(fm,lm,i));
+      /*
       bufferpool = new Buffer[numbuffs];
       numAvailable = numbuffs;
       for (int i=0; i<numbuffs; i++)
          bufferpool[i] = new Buffer(fm, lm);
+      */
    }
    
    /**
@@ -40,9 +50,8 @@ public class BufferMgr {
     * @param txnum the transaction's id number
     */
    public synchronized void flushAll(int txnum) {
-      for (Buffer buff : bufferpool)
-         if (buff.modifyingTx() == txnum)
-         buff.flush();
+      for(Buffer buff : map_buffer.values())
+         if(buff.modifyingTx() == txnum) buff.flush();
    }
    
    /**
@@ -53,6 +62,7 @@ public class BufferMgr {
    public synchronized void unpin(Buffer buff) {
       buff.unpin();
       if (!buff.isPinned()) {
+         unpinned_list.add(buff);
          numAvailable++;
          notifyAll();
       }
@@ -83,6 +93,12 @@ public class BufferMgr {
       }
    }  
    
+   public void printStatus() {
+      int a = 1;
+      int b = 2;
+      System.out.println(a+b);
+   }
+
    /**
     * Returns true if starttime is older than 10 seconds
     * @param starttime timestamp 
@@ -102,6 +118,19 @@ public class BufferMgr {
     * @return the pinned buffer
     */
    private Buffer tryToPin(BlockId blk) {
+      Buffer buff = findExistingBuffer(blk); //현재 할당된것중에서 있는가?
+      if(buff == null) {
+         buff = chooseUnpinnedBuffer();
+         if(buff == null) return null;
+         buff.assignToBlock(blk);
+         map_buffer.put(blk,buff);
+      }
+      if(!buff.isPinned())
+         numAvailable--;
+      buff.pin();
+      return buff;
+
+      /*
       Buffer buff = findExistingBuffer(blk);
       if (buff == null) {
          buff = chooseUnpinnedBuffer();
@@ -113,6 +142,7 @@ public class BufferMgr {
          numAvailable--;
       buff.pin();
       return buff;
+      */
    }
    
    /**
@@ -121,22 +151,31 @@ public class BufferMgr {
     * @return the found buffer       
     */
    private Buffer findExistingBuffer(BlockId blk) {
+      return map_buffer.get(blk);
+      /*
       for (Buffer buff : bufferpool) {
          BlockId b = buff.block();
          if (b != null && b.equals(blk))
             return buff;
       }
       return null;
+      */
    }
    
    /**
     * Find and return an unpinned buffer     . 
-    * @return the unpinned buffer       
+    * @return the unpinned buffer
+    * 그냥 buff를 순회하면서 pinned되지 않았다면 선택하는 지극히 원시적인 알고리즘이다.
+    * 심지어 찾는데도 바로바로나오지 않는다.
     */
    private Buffer chooseUnpinnedBuffer() {
+      if(unpinned_list.size() == 0) return null;
+      return unpinned_list.poll();
+      /*
       for (Buffer buff : bufferpool)
          if (!buff.isPinned())
          return buff;
       return null;
+      */
    }
 }

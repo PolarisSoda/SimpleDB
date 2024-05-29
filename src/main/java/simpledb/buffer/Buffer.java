@@ -20,13 +20,23 @@ public class Buffer {
    private int pins = 0;  /* the number of times the buffer has been pinned */
    private int txnum = -1;  /* dirty flag. The ID of the modifying transaction for this buffer */
    private int lsn = -1;   /* log sequence number */
+   private int buff_id; /* buffer's id */
 
    /**
     * Constructor 
     */
+   /*
    public Buffer(FileMgr fm, LogMgr lm) {
       this.fm = fm;
       this.lm = lm;
+      contents = new Page(fm.blockSize());
+   }
+   */
+
+   public Buffer(FileMgr fm, LogMgr lm, int id) {
+      this.fm = fm;
+      this.lm = lm;
+      this.buff_id = id;
       contents = new Page(fm.blockSize());
    }
    
@@ -44,6 +54,10 @@ public class Buffer {
     */
    public BlockId block() {
       return blk;
+   }
+
+   public int getID() {
+      return buff_id;
    }
 
    /**
