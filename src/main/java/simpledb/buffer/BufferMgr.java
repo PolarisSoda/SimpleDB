@@ -63,6 +63,7 @@ public class BufferMgr {
       }
       System.out.print("Unpinned Buffers in LRU order:");
       for(Buffer buff : unpinned_list) System.out.printf(" %d",buff.getID());
+      System.out.println();
    }
 
    private boolean waitingTooLong(long starttime) {
