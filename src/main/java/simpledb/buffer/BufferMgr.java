@@ -54,7 +54,7 @@ public class BufferMgr {
       }
    }  
    
-   public void printStatus() {
+   public synchronized void printStatus() {
       for(Map.Entry<BlockId,Buffer> entry : map_buffer.entrySet()) {
          BlockId now_block = entry.getKey();
          Buffer now_buff = entry.getValue();
