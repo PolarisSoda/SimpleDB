@@ -61,6 +61,8 @@ public class BufferMgr {
          String str = now_buff.isPinned() ? "pinned" : "unpinned";
          System.out.printf("Buffer %d: %s %s\n",now_buff.getID(),now_block.toString(),str);
       }
+      System.out.print("Unpinned Buffers in LRU order:");
+      for(Buffer buff : unpinned_list) System.out.printf(" %d",buff.getID());
    }
 
    private boolean waitingTooLong(long starttime) {
