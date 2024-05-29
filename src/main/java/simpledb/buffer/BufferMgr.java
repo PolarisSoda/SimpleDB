@@ -94,9 +94,12 @@ public class BufferMgr {
    }  
    
    public void printStatus() {
-      int a = 1;
-      int b = 2;
-      System.out.println(a+b);
+      for(Map.Entry<BlockId,Buffer> entry : map_buffer.entrySet()) {
+         BlockId now_block = entry.getKey();
+         Buffer now_buff = entry.getValue();
+         String str = now_buff.isPinned() ? "pinned" : "unpinned";
+         System.out.printf("Buffer %d: %s %s\n",now_buff.getID(),now_block.toString(),str);
+      }
    }
 
    /**
