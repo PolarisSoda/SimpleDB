@@ -122,7 +122,7 @@ class LockTable {
    private int hasXlock(BlockId blk) {
       ArrayList<Integer> lock_list = locks.get(blk);
       if(lock_list == null || lock_list.size() == 0) return 0;
-      for(Integer id : lock_list) if(id < 0) return id.intValue();
+      for(Integer id : lock_list) if(id < 0) return Math.abs(id.intValue());
       return 0;
    }
    
