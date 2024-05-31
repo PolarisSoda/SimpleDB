@@ -2,7 +2,7 @@ package simpledb.tx.concurrency;
 
 import java.util.*;
 
-import org.apache.derby.diag.LockTable;
+//import org.apache.derby.diag.LockTable;
 
 import simpledb.file.BlockId;
 
