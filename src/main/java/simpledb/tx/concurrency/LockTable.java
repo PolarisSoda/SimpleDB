@@ -80,13 +80,6 @@ class LockTable {
      * 다른 코드가 필요없는 것으로 보인다.
      */
    synchronized void xLock(BlockId blk,int txnum) {
-      if(txnum == 3) {
-         ArrayList<Integer> temp = locks.get(blk);
-         if(temp != null) {
-            for(int num : temp) System.out.printf("%d ",num);
-            System.out.println();
-         }
-      }
       try {
          while(hasOtherSLocks(blk,txnum) == true) {
             int having_tx = getOldestLock(blk,txnum);
@@ -120,23 +113,25 @@ class LockTable {
          } else {
             locks.put(blk,lock_list);
          }
+      } else {
+         notifyAll();
       }
    }
    
-   private synchronized int hasXlock(BlockId blk) {
+   private int hasXlock(BlockId blk) {
       ArrayList<Integer> lock_list = locks.get(blk);
       if(lock_list == null || lock_list.size() == 0) return 0;
       for(Integer id : lock_list) if(id < 0) return Math.abs(id.intValue());
       return 0;
    }
    
-   private synchronized boolean hasOtherSLocks(BlockId blk,int txnum) {
+   private boolean hasOtherSLocks(BlockId blk,int txnum) {
       ArrayList<Integer> lock_list = locks.get(blk);
       if(lock_list != null && lock_list.size() == 1 && lock_list.contains(Integer.valueOf(txnum))) return false;
       return true;
    }
    
-   private synchronized int getOldestLock(BlockId blk,int txnum) {
+   private int getOldestLock(BlockId blk,int txnum) {
       int ret = 0x7FFFFFFF;
       ArrayList<Integer> lock_list = locks.get(blk);
       if(lock_list != null) {
