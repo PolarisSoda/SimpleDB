@@ -80,6 +80,13 @@ class LockTable {
      * 다른 코드가 필요없는 것으로 보인다.
      */
    synchronized void xLock(BlockId blk,int txnum) {
+      if(txnum == 3) {
+         ArrayList<Integer> temp = locks.get(blk);
+         if(temp != null) {
+            for(int num : temp) System.out.printf("%d ",num);
+            System.out.println();
+         }
+      }
       try {
          while(hasOtherSLocks(blk,txnum) == true) {
             int having_tx = getOldestLock(blk,txnum);
