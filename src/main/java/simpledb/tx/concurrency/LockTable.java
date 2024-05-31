@@ -54,7 +54,6 @@ class LockTable {
          int having_tx;
          while((having_tx = hasXlock(blk)) != 0) {
             //이 block에 대해 Xlock를 가지고 있는 친구가 있다면
-            System.out.printf("%d %d\n",having_tx,txnum);
             if(having_tx < txnum) throw new LockAbortException(); //근데 이 친구가 저보다 오래됐네요?
             else wait(); //젊으면 기다리기.
          }
@@ -82,10 +81,8 @@ class LockTable {
      */
    synchronized void xLock(BlockId blk,int txnum) {
       try {
-
          while(hasOtherSLocks(blk,txnum) == true) {
-            Integer having_tx = getOldestLock(blk,txnum);
-            System.out.printf("%d %d!!!",having_tx,txnum);
+            int having_tx = getOldestLock(blk,txnum);
             if(having_tx < txnum) throw new LockAbortException();
             else wait();
          }
@@ -127,17 +124,22 @@ class LockTable {
    }
    
    private boolean hasOtherSLocks(BlockId blk,int txnum) {
-      //만약 Array안에 오직 하나만 있고 그게 txnum이라면.....
       ArrayList<Integer> lock_list = locks.get(blk);
-      if(lock_list != null && lock_list.size() == 1 && lock_list.contains(Integer.valueOf(txnum))) return false;
+      if(lock_list == null) throw new LockAbortException();
+      if(lock_list.size() == 1 && lock_list.contains(Integer.valueOf(txnum))) return false;
       return false;
    }
    
    private int getOldestLock(BlockId blk,int txnum) {
       int ret = 0x7FFFFFFF;
       ArrayList<Integer> lock_list = locks.get(blk);
-      if(lock_list != null)
-         for(int num : lock_list) if(ret > Math.abs(num) && Math.abs(num) != txnum) ret = Math.abs(num);
+      if(lock_list != null) {
+         for(int num : lock_list) {
+            int now = Math.abs(num);
+            if(now == txnum) continue;
+            if(ret > now) ret = now;
+         }
+      }
       return ret;
    }
    
