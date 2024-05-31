@@ -139,8 +139,4 @@ class LockTable {
       return ret;
    }
    
-   private int getLockVal(BlockId blk) {
-      Integer ival = locks.get(blk);
-      return (ival == null) ? 0 : ival.intValue();
-   }
 }
