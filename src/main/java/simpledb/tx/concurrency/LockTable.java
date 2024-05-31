@@ -36,7 +36,6 @@ so that the transaction id gets passed to the lock manager methods.
  */
 
 class LockTable {
-   private static final long MAX_TIME = 10000; // 10 seconds
    //private Map<BlockId,Integer> locks = new HashMap<BlockId,Integer>();
    private Map<BlockId,ArrayList<Integer>> locks = new HashMap<BlockId,ArrayList<Integer>>();
    
@@ -55,6 +54,7 @@ class LockTable {
          int having_tx;
          while((having_tx = hasXlock(blk)) != 0) {
             //이 block에 대해 Xlock를 가지고 있는 친구가 있다면
+            System.out.printf("%d %d\n",having_tx,txnum);
             if(having_tx < txnum) throw new LockAbortException(); //근데 이 친구가 저보다 오래됐네요?
             else wait(); //젊으면 기다리기.
          }
@@ -82,6 +82,7 @@ class LockTable {
      */
    synchronized void xLock(BlockId blk,int txnum) {
       try {
+
          while(hasOtherSLocks(blk,txnum) == true) {
             Integer having_tx = getOldestLock(blk,txnum);
             System.out.printf("%d %d!!!",having_tx,txnum);
@@ -128,8 +129,7 @@ class LockTable {
    private boolean hasOtherSLocks(BlockId blk,int txnum) {
       //만약 Array안에 오직 하나만 있고 그게 txnum이라면.....
       ArrayList<Integer> lock_list = locks.get(blk);
-      if(lock_list == null) return true;
-      if(lock_list != null && lock_list.size() == 1 && lock_list.contains(txnum)) return false;
+      if(lock_list != null && lock_list.size() == 1 && lock_list.contains(Integer.valueOf(txnum))) return false;
       return false;
    }
    
