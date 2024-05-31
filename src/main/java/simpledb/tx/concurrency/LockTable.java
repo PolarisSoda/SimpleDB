@@ -84,6 +84,7 @@ class LockTable {
       try {
          while(hasOtherSLocks(blk,txnum) == true) {
             Integer having_tx = getOldestLock(blk,txnum);
+            System.out.printf("%d %d!!!",having_tx,txnum);
             if(having_tx < txnum) throw new LockAbortException();
             else wait();
          }
