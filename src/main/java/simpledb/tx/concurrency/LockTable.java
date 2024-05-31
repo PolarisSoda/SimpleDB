@@ -133,9 +133,8 @@ class LockTable {
    
    private synchronized boolean hasOtherSLocks(BlockId blk,int txnum) {
       ArrayList<Integer> lock_list = locks.get(blk);
-      if(lock_list == null) throw new LockAbortException();
-      if(lock_list.size() == 1 && lock_list.contains(Integer.valueOf(txnum))) return false;
-      return false;
+      if(lock_list != null && lock_list.size() == 1 && lock_list.contains(Integer.valueOf(txnum))) return false;
+      return true;
    }
    
    private synchronized int getOldestLock(BlockId blk,int txnum) {
