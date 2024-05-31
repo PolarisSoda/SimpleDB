@@ -116,21 +116,21 @@ class LockTable {
       }
    }
    
-   private int hasXlock(BlockId blk) {
+   private synchronized int hasXlock(BlockId blk) {
       ArrayList<Integer> lock_list = locks.get(blk);
       if(lock_list == null || lock_list.size() == 0) return 0;
       for(Integer id : lock_list) if(id < 0) return Math.abs(id.intValue());
       return 0;
    }
    
-   private boolean hasOtherSLocks(BlockId blk,int txnum) {
+   private synchronized boolean hasOtherSLocks(BlockId blk,int txnum) {
       ArrayList<Integer> lock_list = locks.get(blk);
       if(lock_list == null) throw new LockAbortException();
       if(lock_list.size() == 1 && lock_list.contains(Integer.valueOf(txnum))) return false;
       return false;
    }
    
-   private int getOldestLock(BlockId blk,int txnum) {
+   private synchronized int getOldestLock(BlockId blk,int txnum) {
       int ret = 0x7FFFFFFF;
       ArrayList<Integer> lock_list = locks.get(blk);
       if(lock_list != null) {
