@@ -26,9 +26,9 @@ public class ConcurrencyMgr {
     * if the transaction currently has no locks on that block.
     * @param blk a reference to the disk block
     */
-   public void sLock(BlockId blk) {
+   public void sLock(BlockId blk,int txnum) {
       if (locks.get(blk) == null) {
-         locktbl.sLock(blk);
+         locktbl.sLock(blk,txnum);
          locks.put(blk, "S");
       }
    }
@@ -40,10 +40,10 @@ public class ConcurrencyMgr {
     * (if necessary), and then upgrades it to an XLock.
     * @param blk a reference to the disk block
     */
-   public void xLock(BlockId blk) {
+   public void xLock(BlockId blk,int txnum) {
       if (!hasXLock(blk)) {
-         sLock(blk);
-         locktbl.xLock(blk);
+         sLock(blk,txnum);
+         locktbl.xLock(blk,txnum);
          locks.put(blk, "X");
       }
    }
@@ -52,9 +52,9 @@ public class ConcurrencyMgr {
     * Release all locks by asking the lock table to
     * unlock each one.
     */
-   public void release() {
+   public void release(int txnum) {
       for (BlockId blk : locks.keySet()) 
-         locktbl.unlock(blk);
+         locktbl.unlock(blk,txnum);
       locks.clear();
    }
 
