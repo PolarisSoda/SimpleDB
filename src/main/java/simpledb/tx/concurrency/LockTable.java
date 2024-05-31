@@ -90,7 +90,6 @@ class LockTable {
       try {
          while(hasOtherSLocks(blk,txnum) == true) {
             int having_tx = getOldestLock(blk,txnum);
-            System.out.printf("%d!!!!",having_tx);
             if(having_tx < txnum) throw new LockAbortException();
             else wait();
          }
@@ -111,10 +110,10 @@ class LockTable {
     */
    synchronized void unlock(BlockId blk,int txnum) {
       ArrayList<Integer> lock_list = locks.get(blk);
+      ArrayList<Integer> temp = new ArrayList<>();
       if(lock_list != null) {
-         for(int num : lock_list) {
-            if(txnum == Math.abs(num)) lock_list.remove(Integer.valueOf(num));
-         }
+         for(int num : lock_list) if(txnum == Math.abs(num)) temp.add(num);
+         for(Integer e : temp) lock_list.remove(e);
          if(lock_list.size() == 0) {
             locks.remove(blk);
             notifyAll();
