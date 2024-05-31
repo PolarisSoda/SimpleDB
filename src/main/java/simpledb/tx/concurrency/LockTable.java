@@ -137,7 +137,7 @@ class LockTable {
       int ret = 0x7FFFFFFF;
       ArrayList<Integer> lock_list = locks.get(blk);
       if(lock_list != null)
-         for(int num : lock_list) if(ret > Math.abs(num)) ret = Math.abs(num);
+         for(int num : lock_list) if(ret > Math.abs(num) && Math.abs(num) != txnum) ret = Math.abs(num);
       return ret;
    }
    
